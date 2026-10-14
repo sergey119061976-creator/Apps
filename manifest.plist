@@ -17,13 +17,13 @@
             <key>metadata</key>
             <dict>
                 <key>bundle-identifier</key>
-                <string>com.company.app</string>
-                <key>bundle-version</key>
-                <string>1.0.0</string>
-                <key>kind</key>
-                <string>software</string>
-                <key>title</key>
-                <string>My App</string>
+    <string>com.inv.gen</string>
+    <key>bundle-version</key>
+    <string>17.6.1</string>
+    <key>kind</key>
+    <string>software</string>
+    <key>title</key>
+    <string>FamilyBudget</string>
             </dict>
         </dict>
     </array>
