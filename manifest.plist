@@ -17,9 +17,9 @@
             <key>metadata</key>
             <dict>
                 <key>bundle-identifier</key>
-    <string>com.inv.gen</string>
+    <string>ru.oneme.app</string>
     <key>bundle-version</key>
-    <string>17.6.1</string>
+    <string>31710</string>
     <key>kind</key>
     <string>software</string>
     <key>title</key>
