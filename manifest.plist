@@ -17,9 +17,9 @@
             <key>metadata</key>
             <dict>
                 <key>bundle-identifier</key>
-    <string>su.ffg.happ</string>
+    <string>com.blackmagic-design.DaVinciCamera</string>
     <key>bundle-version</key>
-    <string>2610091516</string>
+    <string>3.5.200045</string>
     <key>kind</key>
     <string>software</string>
     <key>title</key>
