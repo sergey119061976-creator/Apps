@@ -19,7 +19,7 @@
                 <key>bundle-identifier</key>
     <string>com.blackmagic-design.DaVinciCamera</string>
     <key>bundle-version</key>
-    <string>3.5.200045</string>
+    <string>3.5.20</string>
     <key>kind</key>
     <string>software</string>
     <key>title</key>
