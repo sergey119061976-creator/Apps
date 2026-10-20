@@ -11,7 +11,7 @@
                     <key>kind</key>
                     <string>software-package</string>
                     <key>url</key>
-                    <string>https://github.com/sergey119061976-creator/Apps/releases/download/V1/MyApp.ipa</string>
+                    <string>https://github.com/sergey119061976-creator/Apps/releases/download/V2/MyApp.ipa</string>
                 </dict>
             </array>
             <key>metadata</key>
@@ -19,7 +19,7 @@
                 <key>bundle-identifier</key>
     <string>su.ffg.happ</string>
     <key>bundle-version</key>
-    <string>31710</string>
+    <string>6.1.0</string>
     <key>kind</key>
     <string>software</string>
     <key>title</key>
