@@ -90,3 +90,23 @@ jobs:
             git commit -m "Update app details for $TAG"
             git push origin HEAD:main
           fi
+
+      - name: Add installation and download links to run summary
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: |
+          IPA_URL="$(jq -r '.assets[] | select(.name | ascii_downcase | endswith(".ipa")) | .browser_download_url' "$RUNNER_TEMP/release-event.json")"
+          PAGES_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
+          MANIFEST_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/manifest.plist"
+          ENCODED_MANIFEST_URL="https%3A%2F%2Fgithub.com%2F${GITHUB_REPOSITORY//\//%2F}%2Freleases%2Flatest%2Fdownload%2Fmanifest.plist"
+          INSTALL_URL="itms-services://?action=download-manifest&url=${ENCODED_MANIFEST_URL}"
+
+          {
+            echo "## Ссылки на установку и скачивание"
+            echo
+            echo "- [Открыть страницу установки с кнопкой «Установить»]($PAGES_URL)"
+            echo "- [Скачать IPA для установки вручную]($IPA_URL)"
+            echo "- [Установить напрямую на iPhone/iPad]($INSTALL_URL)"
+            echo "- [Открыть manifest]($MANIFEST_URL)"
+            echo "- [Открыть релиз $TAG](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$TAG)"
+          } >> "$GITHUB_STEP_SUMMARY"
