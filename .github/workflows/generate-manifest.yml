@@ -1,19 +1,27 @@
-
-name: Generate iOS install manifest
+name: Publish iOS release page data
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag to process
+        required: true
+        type: string
 
 permissions:
   contents: write
 
-jobs:
-  generate-manifest:
-    runs-on: ubuntu-latest
+concurrency:
+  group: publish-ios-release-page
+  cancel-in-progress: false
 
+jobs:
+  publish:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Check out main
         uses: actions/checkout@v4
         with:
           ref: main
@@ -23,29 +31,62 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Generate manifest from IPA
-        env:
-          EVENT_PATH: ${{ github.event_path }}
-        run: |
-          python scripts/generate_manifest.py \
-            --event "$EVENT_PATH" \
-            --output dist/manifest.plist \
-            --ipa-output dist/app.ipa
+      - name: Install PNG validation dependency
+        run: python -m pip install Pillow
 
-      - name: Upload manifest to this release
+      - name: Set up Go for Assets.car extraction
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+
+      - name: Install carfile-go
+        run: go install github.com/devcxm/carfile-go/cmd/carfile@v0.8.0
+
+      - name: Prepare release data
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/release-event.json"
+          else
+            cp "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/release-event.json"
+          fi
+
+      - name: Generate manifest, icon, and app info
+        run: |
+          python scripts/generate_manifest.py \
+            --event "$RUNNER_TEMP/release-event.json" \
+            --output-dir dist
+
+      - name: Upload generated files to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
           gh release upload "$TAG" \
-            dist/manifest.plist#manifest.plist \
+            dist/manifest.plist \
+            dist/app-icon.png \
+            dist/app-info.json \
             --repo "$GITHUB_REPOSITORY" \
             --clobber
 
-          MANIFEST_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/manifest.plist"
-
-          echo "## iPhone installation link" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo '```text' >> "$GITHUB_STEP_SUMMARY"
-          echo "itms-services://?action=download-manifest&url=${MANIFEST_URL}" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish latest app details to GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: |
+          LATEST_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          if [ "$LATEST_TAG" != "$TAG" ]; then
+            echo "This release is not the latest stable release; page data stays unchanged."
+            exit 0
+          fi
+          cp dist/app-info.json app-info.json
+          cp dist/app-icon.png app-icon.png
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app-info.json app-icon.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Update app details for $TAG"
+            git push origin HEAD:main
+          fi
