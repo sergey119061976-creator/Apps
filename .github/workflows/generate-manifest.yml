@@ -1,0 +1,51 @@
+
+name: Generate iOS install manifest
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  generate-manifest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate manifest from IPA
+        env:
+          EVENT_PATH: ${{ github.event_path }}
+        run: |
+          python scripts/generate_manifest.py \
+            --event "$EVENT_PATH" \
+            --output dist/manifest.plist \
+            --ipa-output dist/app.ipa
+
+      - name: Upload manifest to this release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release upload "$TAG" \
+            dist/manifest.plist#manifest.plist \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
+
+          MANIFEST_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/manifest.plist"
+
+          echo "## iPhone installation link" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          echo "itms-services://?action=download-manifest&url=${MANIFEST_URL}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
