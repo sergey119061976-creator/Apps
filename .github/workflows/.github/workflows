@@ -1,0 +1,77 @@
+name: Publish iOS release page data
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-ios-release-page
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PNG validation dependency
+        run: python -m pip install Pillow
+
+      - name: Set up Go for Assets.car extraction
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+
+      - name: Install carfile-go
+        run: go install github.com/devcxm/carfile-go/cmd/carfile@v0.8.0
+
+      - name: Generate manifest, icon, and app info
+        env:
+          EVENT_PATH: ${{ github.event_path }}
+        run: >-
+          python scripts/generate_release_files.py
+          --event "$EVENT_PATH"
+          --output-dir dist
+
+      - name: Upload generated files to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release upload "$TAG" \
+            dist/manifest.plist \
+            dist/app-icon.png \
+            dist/app-info.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
+
+      - name: Publish latest app details to GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          LATEST_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          if [ "$LATEST_TAG" != "$TAG" ]; then
+            echo "This release is not the latest stable release; page data stays unchanged."
+            exit 0
+          fi
+          cp dist/app-info.json app-info.json
+          cp dist/app-icon.png app-icon.png
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app-info.json app-icon.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Update app details for $TAG"
+            git push origin HEAD:main
+          fi
