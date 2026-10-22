@@ -117,7 +117,8 @@ def main() -> None:
 
     event_path = Path(args.event)
     event = json.loads(event_path.read_text(encoding="utf-8"))
-    release = event["release"]
+    # Release events wrap data under "release"; API lookups return it at the root.
+    release = event.get("release", event)
     tag = release["tag_name"]
     ipa_assets = [
         asset for asset in release.get("assets", [])
