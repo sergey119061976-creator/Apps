@@ -1,6 +1,7 @@
 {
   "title": "Breathio",
   "version": "1.11",
+  "minimum_ios": "17.0",
   "tag": "OsDyhanie",
   "icon": "app-icon.png",
   "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/OsDyhanie/manifest.plist",
