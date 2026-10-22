@@ -1,0 +1,10 @@
+{
+  "title": "MARIO RUN",
+  "version": "3.4.3",
+  "minimum_ios": "15.0",
+  "tag": "Mario",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Mario/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Mario/Super.Mario.Run_3.4.3.ipa",
+  "apple_id": "mi…l.ru"
+}
