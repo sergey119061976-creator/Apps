@@ -1,0 +1,10 @@
+{
+  "title": "VK",
+  "version": "8.183.1",
+  "minimum_ios": "17.6",
+  "tag": "VK",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/VK/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/VK/_8.183.1.ipa",
+  "apple_id": "mi…l.ru"
+}
