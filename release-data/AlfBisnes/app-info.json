@@ -1,6 +1,7 @@
 {
   "title": "Бизнес",
   "version": "12.10.0",
+  "minimum_ios": "14.0",
   "tag": "AlfBisnes",
   "icon": "app-icon.png",
   "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/AlfBisnes/manifest.plist",
