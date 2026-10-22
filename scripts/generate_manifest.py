@@ -9,8 +9,8 @@ import subprocess
 import tempfile
 import urllib.request
 import zipfile
-from pathlib import Path
 import plistlib
+from pathlib import Path
 from PIL import Image
 
 
@@ -172,12 +172,16 @@ def main() -> None:
         with (output_dir / "manifest.plist").open("wb") as output:
             plistlib.dump(manifest, output, fmt=plistlib.FMT_XML, sort_keys=False)
 
+    manifest_url = (
+        f"https://github.com/{REPOSITORY}/releases/download/{tag}/manifest.plist"
+    )
     app_info = {
         "title": title,
         "version": str(version),
         "tag": tag,
         "icon": "app-icon.png",
-        "manifest": f"https://github.com/{REPOSITORY}/releases/latest/download/manifest.plist",
+        "manifest": manifest_url,
+        "download": ipa_url,
     }
     (output_dir / "app-info.json").write_text(
         json.dumps(app_info, ensure_ascii=False, indent=2) + "\n",
