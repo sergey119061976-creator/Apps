@@ -1,9 +1,9 @@
 {
-  "title": "Бизнес",
-  "version": "12.10.0",
-  "tag": "AlfBisnes",
+  "title": "Breathio",
+  "version": "1.11",
+  "tag": "OsDyhanie",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/AlfBisnes/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/AlfBisnes/_12.10.0.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/OsDyhanie/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/OsDyhanie/Breathio.-._1.11.ipa",
   "apple_id": "mi…l.ru"
 }
