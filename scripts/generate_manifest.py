@@ -51,6 +51,14 @@ def icon_candidates_from_plist(info: dict, app_prefix: str) -> list[str]:
     return names
 
 
+def mask_apple_id(value: str | None) -> str | None:
+    """Keep only the first two and last four characters for public metadata."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    value = value.strip()
+    return value[:2] + "…" + value[-4:]
+
+
 def extract_apple_id(archive: zipfile.ZipFile) -> str | None:
     """Read the account identifier recorded in an App Store iTunesMetadata.plist."""
     paths = [
@@ -219,7 +227,7 @@ def main() -> None:
         "icon": "app-icon.png",
         "manifest": manifest_url,
         "download": ipa_url,
-        "apple_id": apple_id,
+        "apple_id": mask_apple_id(apple_id),
     }
     (output_dir / "app-info.json").write_text(
         json.dumps(app_info, ensure_ascii=False, indent=2) + "\n",
