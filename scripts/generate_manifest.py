@@ -3,8 +3,6 @@
 
 import argparse
 import json
-import os
-import plistlib
 import shutil
 import struct
 import subprocess
@@ -12,6 +10,7 @@ import tempfile
 import urllib.request
 import zipfile
 from pathlib import Path
+import plistlib
 from PIL import Image
 
 
@@ -134,12 +133,19 @@ def main() -> None:
         ipa_path = work / "app.ipa"
         download(ipa_assets[0]["browser_download_url"], ipa_path)
         with zipfile.ZipFile(ipa_path) as archive:
+            # An IPA can bundle Watch apps and extensions with their own Info.plist.
+            # The installable iOS app is the .app directly inside Payload/.
             plist_paths = [
                 name for name in archive.namelist()
-                if name.startswith("Payload/") and name.endswith(".app/Info.plist")
+                if name.startswith("Payload/")
+                and name.endswith(".app/Info.plist")
+                and len(name.split("/")) == 3
             ]
             if len(plist_paths) != 1:
-                raise RuntimeError("IPA must contain exactly one Payload/*.app/Info.plist")
+                raise RuntimeError(
+                    "IPA must contain exactly one main Payload/<App>.app/Info.plist; "
+                    f"found {len(plist_paths)}: {plist_paths}"
+                )
             plist_path = plist_paths[0]
             app_dir = plist_path.removesuffix("/Info.plist")
             info = plistlib.loads(archive.read(plist_path))
