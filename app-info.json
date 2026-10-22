@@ -1,10 +1,10 @@
 {
-  "title": "Anero",
-  "version": "230.1",
+  "title": "Room Assist",
+  "version": "1.0.1",
   "minimum_ios": "16.0",
-  "tag": "Avito",
+  "tag": "Dom-RF",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Avito/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Avito/Anero_230.1.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Dom-RF/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Dom-RF/Room.Assist_1.0.1.ipa",
   "apple_id": "mi…l.ru"
 }

@@ -1,0 +1,10 @@
+{
+  "title": "Room Assist",
+  "version": "1.0.1",
+  "minimum_ios": "16.0",
+  "tag": "Dom-RF",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Dom-RF/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Dom-RF/Room.Assist_1.0.1.ipa",
+  "apple_id": "mi…l.ru"
+}
