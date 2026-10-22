@@ -197,6 +197,7 @@ def main() -> None:
             bundle_id = info.get("CFBundleIdentifier")
             version = info.get("CFBundleShortVersionString") or info.get("CFBundleVersion")
             title = info.get("CFBundleDisplayName") or info.get("CFBundleName")
+            minimum_ios = info.get("MinimumOSVersion")
             if not bundle_id or not version or not title:
                 raise RuntimeError("Could not determine app bundle ID, version, and title")
             icon_source = extract_icon(archive, info, app_dir, work)
@@ -223,6 +224,7 @@ def main() -> None:
     app_info = {
         "title": title,
         "version": str(version),
+        "minimum_ios": str(minimum_ios) if minimum_ios is not None else None,
         "tag": tag,
         "icon": "app-icon.png",
         "manifest": manifest_url,
