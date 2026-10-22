@@ -2,9 +2,9 @@
   "title": "Ваш ЗСД 2.0",
   "version": "2.2.2",
   "minimum_ios": "15.0",
-  "tag": "ZSD-1",
+  "tag": "ZSD-2",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/ZSD-1/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/ZSD-1/2.0_2.2.2.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/ZSD-2/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/ZSD-2/2.0_2.2.2_fdcf07aa-193d-4a8b-a14f-f96dce3f5bc9.ipa",
   "apple_id": "mi…l.ru"
 }
