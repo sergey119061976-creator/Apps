@@ -4,5 +4,6 @@
   "tag": "A12",
   "icon": "app-icon.png",
   "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/A12/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/A12/_.eSign_1.1.1.ipa"
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/A12/_.eSign_1.1.1.ipa",
+  "apple_id": "minesota_us@mail.ru"
 }
