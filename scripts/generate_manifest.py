@@ -117,7 +117,7 @@ def extract_icon(archive: zipfile.ZipFile, info: dict, app_dir: str, work: Path)
         raise RuntimeError("carfile-go CLI is missing from PATH")
     extracted = work / "car-extracted"
     extraction = subprocess.run(
-        [extractor, "--output", str(extracted), "--include", "AppIcon", str(car_file)],
+        [extractor, "--output", str(extracted), str(car_file)],
         check=False,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
