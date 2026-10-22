@@ -1,0 +1,10 @@
+{
+  "title": "TBirds",
+  "version": "1.21.1",
+  "minimum_ios": "16.0",
+  "tag": "TBank",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/TBank/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/TBank/The.Birds.Voices_1.21.1.ipa",
+  "apple_id": "mi…l.ru"
+}
