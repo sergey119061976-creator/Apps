@@ -1,10 +1,10 @@
 {
-  "title": "VK Video",
-  "version": "8.183",
-  "minimum_ios": "17.6",
-  "tag": "VK-Video",
+  "title": "Газпромбанк",
+  "version": "2.2.1",
+  "minimum_ios": "10.3",
+  "tag": "Gazprom",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/VK-Video/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/VK-Video/_8.183_c903bc99-5831-47d7-9b83-2e93bc6d12a9.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Gazprom/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Gazprom/_2.2.1.ipa",
   "apple_id": "mi…l.ru"
 }

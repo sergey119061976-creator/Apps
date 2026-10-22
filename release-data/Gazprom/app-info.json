@@ -1,0 +1,10 @@
+{
+  "title": "Газпромбанк",
+  "version": "2.2.1",
+  "minimum_ios": "10.3",
+  "tag": "Gazprom",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Gazprom/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Gazprom/_2.2.1.ipa",
+  "apple_id": "mi…l.ru"
+}
