@@ -56,7 +56,12 @@ jobs:
             jq -s 'add' "$RUNNER_TEMP/releases-pages.json" > "$RUNNER_TEMP/releases-list.json"
           fi
 
-          jq -c '
+          FORCE_ALL=false
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            FORCE_ALL=true
+          fi
+
+          jq --arg force_all "$FORCE_ALL" -c '
             [
               .[]
               | select(.draft == false)
@@ -64,7 +69,7 @@ jobs:
               | . as $release
               | ([.assets[]? | select(.name == "manifest.plist" or .name == "app-icon.png" or .name == "app-info.json") | .updated_at] | if length == 3 then min else "" end) as $generated
               | ([.assets[] | select(.name | ascii_downcase | endswith(".ipa"))][0].updated_at) as $ipa
-              | select($generated == "" or $generated < $ipa)
+              | select($force_all == "true" or $generated == "" or $generated < $ipa)
               | {tag: $release.tag_name}
             ]
           ' "$RUNNER_TEMP/releases-list.json" > "$RUNNER_TEMP/pending-releases.json"
