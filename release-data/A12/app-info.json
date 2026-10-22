@@ -1,0 +1,8 @@
+{
+  "title": "eSign PDF",
+  "version": "1.1.1",
+  "tag": "A12",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/A12/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/A12/_.eSign_1.1.1.ipa"
+}
