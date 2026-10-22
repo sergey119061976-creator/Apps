@@ -1,0 +1,8 @@
+{
+  "title": "Blackmagic Cam",
+  "version": "3.5.20",
+  "tag": "V2",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/V2/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/V2/Blackmagic.Camera_3.5.20.ipa"
+}
