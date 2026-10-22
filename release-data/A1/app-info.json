@@ -1,0 +1,9 @@
+{
+  "title": "Ютека",
+  "version": "2.12.2",
+  "tag": "A1",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/A1/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/A1/_2.12.2.ipa",
+  "apple_id": "minesota_us@mail.ru"
+}
