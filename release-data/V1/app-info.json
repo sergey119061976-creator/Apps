@@ -1,0 +1,8 @@
+{
+  "title": "GitHub",
+  "version": "1.281.0",
+  "tag": "V1",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/V1/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/V1/GitHub_1.281.0.ipa"
+}
