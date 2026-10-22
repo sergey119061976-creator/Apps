@@ -116,13 +116,18 @@ def extract_icon(archive: zipfile.ZipFile, info: dict, app_dir: str, work: Path)
     if not extractor:
         raise RuntimeError("carfile-go CLI is missing from PATH")
     extracted = work / "car-extracted"
-    subprocess.run(
+    extraction = subprocess.run(
         [extractor, "--output", str(extracted), "--include", "AppIcon", str(car_file)],
-        check=True,
+        check=False,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
     )
+    if extraction.returncode:
+        details = extraction.stdout.strip() or "no diagnostic output"
+        raise RuntimeError(
+            f"carfile-go failed with exit code {extraction.returncode}: {details}"
+        )
     pngs = []
     for path in extracted.rglob("*.png"):
         size = png_size(path)
