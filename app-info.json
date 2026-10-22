@@ -3,5 +3,6 @@
   "version": "1.281.0",
   "tag": "V3",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/latest/download/manifest.plist"
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/V3/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/V3/GitHub_1.281.0.ipa"
 }
