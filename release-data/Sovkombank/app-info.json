@@ -1,0 +1,10 @@
+{
+  "title": "Мой Бюджет+",
+  "version": "1.0.0",
+  "minimum_ios": "15.0",
+  "tag": "Sovkombank",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Sovkombank/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Sovkombank/%2B_1.0.0.ipa",
+  "apple_id": "mi…l.ru"
+}
