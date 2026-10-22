@@ -3,6 +3,10 @@ name: Publish iOS release page data
 on:
   release:
     types: [published]
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/generate-manifest.yml
   workflow_dispatch:
     inputs:
       release_tag:
@@ -45,13 +49,20 @@ jobs:
       - name: Prepare release data
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/release-event.json"
-          else
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
+            RELEASE_TAG="$(jq -r '.release.tag_name' "$GITHUB_EVENT_PATH")"
             cp "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/release-event.json"
+          else
+            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+              RELEASE_TAG="$INPUT_RELEASE_TAG"
+            else
+              RELEASE_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+            fi
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/release-event.json"
           fi
+          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
 
       - name: Generate manifest, icon, and app info
         run: |
@@ -62,9 +73,8 @@ jobs:
       - name: Upload generated files to the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
-          gh release upload "$TAG" \
+          gh release upload "$RELEASE_TAG" \
             dist/manifest.plist \
             dist/app-icon.png \
             dist/app-info.json \
@@ -74,10 +84,9 @@ jobs:
       - name: Publish latest app details to GitHub Pages
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
           LATEST_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
-          if [ "$LATEST_TAG" != "$TAG" ]; then
+          if [ "$LATEST_TAG" != "$RELEASE_TAG" ]; then
             echo "This release is not the latest stable release; page data stays unchanged."
             exit 0
           fi
@@ -87,15 +96,13 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app-info.json app-icon.png
           if ! git diff --cached --quiet; then
-            git commit -m "Update app details for $TAG"
+            git commit -m "Update app details for $RELEASE_TAG"
             git push origin HEAD:main
           fi
 
       - name: Add installation and download links to run summary
-        env:
-          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
-          IPA_URL="$(jq -r '.assets[] | select(.name | ascii_downcase | endswith(".ipa")) | .browser_download_url' "$RUNNER_TEMP/release-event.json")"
+          IPA_URL="$(jq -r '(.release // .).assets[]? | select(.name | ascii_downcase | endswith(".ipa")) | .browser_download_url' "$RUNNER_TEMP/release-event.json")"
           PAGES_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
           MANIFEST_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/manifest.plist"
           ENCODED_MANIFEST_URL="https%3A%2F%2Fgithub.com%2F${GITHUB_REPOSITORY//\//%2F}%2Freleases%2Flatest%2Fdownload%2Fmanifest.plist"
@@ -108,5 +115,5 @@ jobs:
             echo "- [Скачать IPA для установки вручную]($IPA_URL)"
             echo "- [Установить напрямую на iPhone/iPad]($INSTALL_URL)"
             echo "- [Открыть manifest]($MANIFEST_URL)"
-            echo "- [Открыть релиз $TAG](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$TAG)"
+            echo "- [Открыть релиз $RELEASE_TAG](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$RELEASE_TAG)"
           } >> "$GITHUB_STEP_SUMMARY"
