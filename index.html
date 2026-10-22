@@ -27,22 +27,38 @@
     <p id="version"></p>
     <p class="instructions">Откройте эту страницу в Safari на iPhone или iPad и нажмите «Установить». Подтвердите установку приложения на устройстве.</p>
     <a id="install" href="itms-services://?action=download-manifest&amp;url=https%3A%2F%2Fgithub.com%2Fsergey119061976-creator%2FApps%2Freleases%2Flatest%2Fdownload%2Fmanifest.plist" aria-disabled="true">Установить</a>
-    <p id="status" role="status">Загружаем сведения о последней версии…</p>
+    <p id="status" role="status">Загружаем сведения о выпуске…</p>
   </main>
   <script>
-    fetch('./app-info.json?refresh=' + Date.now(), { cache: 'no-store' })
-      .then(response => { if (!response.ok) throw new Error('Нет данных о выпуске'); return response.json(); })
+    const params = new URLSearchParams(window.location.search);
+    const requestedTag = params.get('release');
+    const releaseFolder = requestedTag
+      ? './release-data/' + encodeURIComponent(requestedTag)
+      : '.';
+    const infoUrl = releaseFolder + '/app-info.json?refresh=' + Date.now();
+
+    fetch(infoUrl, { cache: 'no-store' })
+      .then(response => {
+        if (!response.ok) throw new Error('Нет данных о выпуске');
+        return response.json();
+      })
       .then(app => {
         document.title = app.title || 'Установка приложения';
         document.getElementById('title').textContent = app.title || 'Приложение';
         document.getElementById('version').textContent = app.version ? 'Версия ' + app.version : '';
-        document.getElementById('icon').src = './app-icon.png?refresh=' + encodeURIComponent(app.tag || Date.now());
-        const manifest = app.manifest || 'https://github.com/sergey119061976-creator/Apps/releases/latest/download/manifest.plist';
-        document.getElementById('install').href = 'itms-services://?action=download-manifest&url=' + encodeURIComponent(manifest);
+        document.getElementById('icon').src =
+          releaseFolder + '/app-icon.png?refresh=' + encodeURIComponent(app.tag || Date.now());
+        const manifest = app.manifest;
+        if (!manifest) throw new Error('У выпуска нет manifest.plist');
+        document.getElementById('install').href =
+          'itms-services://?action=download-manifest&url=' + encodeURIComponent(manifest);
         document.getElementById('install').setAttribute('aria-disabled', 'false');
         document.getElementById('status').remove();
       })
-      .catch(() => { document.getElementById('status').textContent = 'Информация о выпуске пока недоступна.'; });
+      .catch(() => {
+        document.getElementById('status').textContent =
+          requestedTag ? 'Данные этого релиза пока недоступны.' : 'Информация о выпуске пока недоступна.';
+      });
   </script>
 </body>
 </html>
