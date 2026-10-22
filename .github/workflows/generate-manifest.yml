@@ -2,11 +2,14 @@ name: Publish iOS release page data
 
 on:
   release:
-    types: [published]
+    types: [published, edited]
+  schedule:
+    - cron: "*/5 * * * *"
   push:
     branches: [main]
     paths:
       - .github/workflows/generate-manifest.yml
+      - scripts/generate_manifest.py
   workflow_dispatch:
     inputs:
       release_tag:
@@ -46,31 +49,55 @@ jobs:
       - name: Install carfile-go
         run: go install github.com/devcxm/carfile-go/cmd/carfile@v0.8.0
 
-      - name: Prepare release data
+      - name: Find release and wait for its IPA
+        id: release
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           if [ "$GITHUB_EVENT_NAME" = "release" ]; then
             RELEASE_TAG="$(jq -r '.release.tag_name' "$GITHUB_EVENT_PATH")"
-            cp "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/release-event.json"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            RELEASE_TAG="$INPUT_RELEASE_TAG"
           else
-            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-              RELEASE_TAG="$INPUT_RELEASE_TAG"
-            else
-              RELEASE_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
-            fi
-            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/release-event.json"
+            RELEASE_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
           fi
+
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/release-event.json"
           echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
 
+          IPA_COUNT="$(jq '[.assets[]? | select(.name | ascii_downcase | endswith(".ipa"))] | length' "$RUNNER_TEMP/release-event.json")"
+          if [ "$IPA_COUNT" -eq 0 ]; then
+            echo "No IPA attached to $RELEASE_TAG yet. The scheduled check will try again."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$IPA_COUNT" -ne 1 ]; then
+            echo "::error::Release $RELEASE_TAG contains $IPA_COUNT IPA files; exactly one is required."
+            exit 1
+          fi
+
+          IPA_UPDATED="$(jq -r '[.assets[] | select(.name | ascii_downcase | endswith(".ipa"))][0].updated_at' "$RUNNER_TEMP/release-event.json")"
+          GENERATED_UPDATED="$(jq -r '[.assets[]? | select(.name == "manifest.plist" or .name == "app-icon.png" or .name == "app-info.json") | .updated_at] | if length == 3 then min else empty end' "$RUNNER_TEMP/release-event.json")"
+
+          if [ -n "$GENERATED_UPDATED" ] && [ "$(date -u -d "$GENERATED_UPDATED" +%s)" -ge "$(date -u -d "$IPA_UPDATED" +%s)" ]; then
+            echo "Generated files are already current for $RELEASE_TAG."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
       - name: Generate manifest, icon, and app info
+        if: steps.release.outputs.skip != 'true'
         run: |
           python scripts/generate_manifest.py \
             --event "$RUNNER_TEMP/release-event.json" \
             --output-dir dist
 
       - name: Upload generated files to the GitHub Release
+        if: steps.release.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -82,6 +109,7 @@ jobs:
             --clobber
 
       - name: Publish latest app details to GitHub Pages
+        if: steps.release.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -101,8 +129,9 @@ jobs:
           fi
 
       - name: Add installation and download links to run summary
+        if: steps.release.outputs.skip != 'true'
         run: |
-          IPA_URL="$(jq -r '(.release // .).assets[]? | select(.name | ascii_downcase | endswith(".ipa")) | .browser_download_url' "$RUNNER_TEMP/release-event.json")"
+          IPA_URL="$(jq -r '.assets[] | select(.name | ascii_downcase | endswith(".ipa")) | .browser_download_url' "$RUNNER_TEMP/release-event.json")"
           PAGES_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
           MANIFEST_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/manifest.plist"
           ENCODED_MANIFEST_URL="https%3A%2F%2Fgithub.com%2F${GITHUB_REPOSITORY//\//%2F}%2Freleases%2Flatest%2Fdownload%2Fmanifest.plist"
