@@ -1,10 +1,10 @@
 {
-  "title": "Room Assist",
-  "version": "1.0.1",
-  "minimum_ios": "16.0",
-  "tag": "Dom-RF",
+  "title": "Ваш ЗСД 2.0",
+  "version": "2.2.2",
+  "minimum_ios": "15.0",
+  "tag": "ZSD-1",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Dom-RF/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Dom-RF/Room.Assist_1.0.1.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/ZSD-1/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/ZSD-1/2.0_2.2.2.ipa",
   "apple_id": "mi…l.ru"
 }

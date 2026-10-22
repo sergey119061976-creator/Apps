@@ -1,0 +1,10 @@
+{
+  "title": "Ваш ЗСД 2.0",
+  "version": "2.2.2",
+  "minimum_ios": "15.0",
+  "tag": "ZSD-1",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/ZSD-1/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/ZSD-1/2.0_2.2.2.ipa",
+  "apple_id": "mi…l.ru"
+}
