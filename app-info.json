@@ -1,10 +1,10 @@
 {
-  "title": "RUTUBE",
-  "version": "46.6",
-  "minimum_ios": "14.0",
-  "tag": "Rutube",
+  "title": "Anero",
+  "version": "230.1",
+  "minimum_ios": "16.0",
+  "tag": "Avito",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Rutube/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Rutube/RUTUBE_._46.6.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Avito/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Avito/Anero_230.1.ipa",
   "apple_id": "mi…l.ru"
 }
