@@ -16,6 +16,9 @@
     }
     * { box-sizing: border-box; }
     body {
+      position: relative;
+      isolation: isolate;
+      overflow-x: hidden;
       min-height: 100vh;
       margin: 0;
       display: grid;
@@ -27,7 +30,19 @@
         radial-gradient(ellipse at 50% 38%, rgba(255,255,255,.72), rgba(245,245,247,0) 62%),
         #eef0f5;
     }
+    body::before {
+      content: "";
+      position: fixed;
+      z-index: -1;
+      inset: -5%;
+      pointer-events: none;
+      background: url("./app-store-background.jpg") center / cover no-repeat;
+      filter: blur(13px) saturate(1.15);
+      opacity: .19;
+      transform: scale(1.04);
+    }
     main {
+      position: relative;
       width: min(100%, 408px);
       padding: 36px 32px 30px;
       text-align: center;
