@@ -1,0 +1,10 @@
+{
+  "title": "Online",
+  "version": "16.13.0",
+  "minimum_ios": "15.0",
+  "tag": "SberOnline",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/SberOnline/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/SberOnline/_16.13.0.ipa",
+  "apple_id": "mi…l.ru"
+}
