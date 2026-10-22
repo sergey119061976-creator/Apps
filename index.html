@@ -22,19 +22,21 @@
       place-items: center;
       padding: 28px 18px;
       background:
-        radial-gradient(ellipse at 50% 38%, rgba(255,255,255,.95), rgba(245,245,247,0) 58%),
-        #f5f5f7;
+        radial-gradient(ellipse 28rem 25rem at 14% 18%, rgba(104,166,255,.22), transparent 72%),
+        radial-gradient(ellipse 25rem 28rem at 88% 78%, rgba(190,151,255,.19), transparent 72%),
+        radial-gradient(ellipse at 50% 38%, rgba(255,255,255,.72), rgba(245,245,247,0) 62%),
+        #eef0f5;
     }
     main {
       width: min(100%, 408px);
       padding: 36px 32px 30px;
       text-align: center;
-      border: 1px solid rgba(255,255,255,.9);
+      border: 1px solid rgba(255,255,255,.68);
       border-radius: 30px;
-      background: rgba(255,255,255,.86);
-      box-shadow: 0 24px 70px rgba(25,35,55,.09), 0 2px 8px rgba(25,35,55,.04);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background: linear-gradient(140deg, rgba(255,255,255,.63), rgba(255,255,255,.37));
+      box-shadow: 0 24px 70px rgba(25,35,55,.11), 0 2px 8px rgba(25,35,55,.04), inset 0 1px 0 rgba(255,255,255,.72);
+      backdrop-filter: blur(30px) saturate(165%);
+      -webkit-backdrop-filter: blur(30px) saturate(165%);
     }
     img {
       width: 104px;
@@ -110,13 +112,15 @@
       :root { color: #f5f5f7; background: #111113; }
       body {
         background:
-          radial-gradient(ellipse at 50% 38%, rgba(50,50,55,.58), rgba(17,17,19,0) 60%),
+          radial-gradient(ellipse 28rem 25rem at 14% 18%, rgba(47,102,176,.24), transparent 72%),
+          radial-gradient(ellipse 25rem 28rem at 88% 78%, rgba(110,72,160,.20), transparent 72%),
+          radial-gradient(ellipse at 50% 38%, rgba(50,50,55,.48), rgba(17,17,19,0) 62%),
           #111113;
       }
       main {
-        border-color: rgba(255,255,255,.08);
-        background: rgba(30,30,32,.88);
-        box-shadow: 0 24px 70px rgba(0,0,0,.34), 0 2px 8px rgba(0,0,0,.18);
+        border-color: rgba(255,255,255,.16);
+        background: linear-gradient(140deg, rgba(48,49,55,.70), rgba(30,30,34,.54));
+        box-shadow: 0 24px 70px rgba(0,0,0,.34), 0 2px 8px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.10);
       }
       #version { color: #a1a1a6; }
       #minimum-ios, #apple-id, #status { color: #8e8e93; }
