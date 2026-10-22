@@ -25,8 +25,61 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  find-releases:
     runs-on: ubuntu-latest
+    outputs:
+      releases: ${{ steps.find.outputs.releases }}
+      has_work: ${{ steps.find.outputs.has_work }}
+    steps:
+      - name: Find releases with a new IPA
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
+            RELEASE_TAG="$(jq -r '.release.tag_name' "$GITHUB_EVENT_PATH")"
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/releases.json"
+            jq -s '[.[0]]' "$RUNNER_TEMP/releases.json" > "$RUNNER_TEMP/releases-list.json"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            RELEASE_TAG="$INPUT_RELEASE_TAG"
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/releases.json"
+            jq -s '[.[0]]' "$RUNNER_TEMP/releases.json" > "$RUNNER_TEMP/releases-list.json"
+          else
+            gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$RUNNER_TEMP/releases-pages.json"
+            jq -s 'add' "$RUNNER_TEMP/releases-pages.json" > "$RUNNER_TEMP/releases-list.json"
+          fi
+
+          jq -c '
+            [
+              .[]
+              | select(.draft == false)
+              | select(([.assets[]? | select(.name | ascii_downcase | endswith(".ipa"))] | length) == 1)
+              | . as $release
+              | ([.assets[]? | select(.name == "manifest.plist" or .name == "app-icon.png" or .name == "app-info.json") | .updated_at] | if length == 3 then min else "" end) as $generated
+              | ([.assets[] | select(.name | ascii_downcase | endswith(".ipa"))][0].updated_at) as $ipa
+              | select($generated == "" or $generated < $ipa)
+              | {tag: $release.tag_name}
+            ]
+          ' "$RUNNER_TEMP/releases-list.json" > "$RUNNER_TEMP/pending-releases.json"
+
+          if [ "$(jq 'length' "$RUNNER_TEMP/pending-releases.json")" -gt 0 ]; then
+            echo "has_work=true" >> "$GITHUB_OUTPUT"
+            jq -c '{include: .}' "$RUNNER_TEMP/pending-releases.json" | sed 's/^/releases=/' >> "$GITHUB_OUTPUT"
+          else
+            echo "has_work=false" >> "$GITHUB_OUTPUT"
+            echo 'releases={"include":[{"tag":"__none__"}]}' >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: find-releases
+    if: needs.find-releases.outputs.has_work == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.find-releases.outputs.releases) }}
+    env:
+      RELEASE_TAG: ${{ matrix.tag }}
     steps:
       - name: Check out main
         uses: actions/checkout@v4
@@ -49,55 +102,19 @@ jobs:
       - name: Install carfile-go
         run: go install github.com/devcxm/carfile-go/cmd/carfile@v0.8.0
 
-      - name: Find release and wait for its IPA
-        id: release
+      - name: Load selected release
         env:
           GH_TOKEN: ${{ github.token }}
-          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
-            RELEASE_TAG="$(jq -r '.release.tag_name' "$GITHUB_EVENT_PATH")"
-          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            RELEASE_TAG="$INPUT_RELEASE_TAG"
-          else
-            RELEASE_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
-          fi
-
           gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/release-event.json"
-          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
-
-          IPA_COUNT="$(jq '[.assets[]? | select(.name | ascii_downcase | endswith(".ipa"))] | length' "$RUNNER_TEMP/release-event.json")"
-          if [ "$IPA_COUNT" -eq 0 ]; then
-            echo "No IPA attached to $RELEASE_TAG yet. The scheduled check will try again."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if [ "$IPA_COUNT" -ne 1 ]; then
-            echo "::error::Release $RELEASE_TAG contains $IPA_COUNT IPA files; exactly one is required."
-            exit 1
-          fi
-
-          IPA_UPDATED="$(jq -r '[.assets[] | select(.name | ascii_downcase | endswith(".ipa"))][0].updated_at' "$RUNNER_TEMP/release-event.json")"
-          GENERATED_UPDATED="$(jq -r '[.assets[]? | select(.name == "manifest.plist" or .name == "app-icon.png" or .name == "app-info.json") | .updated_at] | if length == 3 then min else empty end' "$RUNNER_TEMP/release-event.json")"
-
-          if [ -n "$GENERATED_UPDATED" ] && [ "$(date -u -d "$GENERATED_UPDATED" +%s)" -ge "$(date -u -d "$IPA_UPDATED" +%s)" ]; then
-            echo "Generated files are already current for $RELEASE_TAG."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "skip=false" >> "$GITHUB_OUTPUT"
 
       - name: Generate manifest, icon, and app info
-        if: steps.release.outputs.skip != 'true'
         run: |
           python scripts/generate_manifest.py \
             --event "$RUNNER_TEMP/release-event.json" \
             --output-dir dist
 
       - name: Upload generated files to the GitHub Release
-        if: steps.release.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -109,7 +126,6 @@ jobs:
             --clobber
 
       - name: Publish latest app details to GitHub Pages
-        if: steps.release.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -129,20 +145,19 @@ jobs:
           fi
 
       - name: Add installation and download links to run summary
-        if: steps.release.outputs.skip != 'true'
         run: |
           IPA_URL="$(jq -r '.assets[] | select(.name | ascii_downcase | endswith(".ipa")) | .browser_download_url' "$RUNNER_TEMP/release-event.json")"
+          MANIFEST_URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/$RELEASE_TAG"
           PAGES_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
-          MANIFEST_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/manifest.plist"
-          ENCODED_MANIFEST_URL="https%3A%2F%2Fgithub.com%2F${GITHUB_REPOSITORY//\//%2F}%2Freleases%2Flatest%2Fdownload%2Fmanifest.plist"
+          ENCODED_MANIFEST_URL="https%3A%2F%2Fgithub.com%2F${GITHUB_REPOSITORY//\//%2F}%2Freleases%2Fdownload%2F$RELEASE_TAG%2Fmanifest.plist"
           INSTALL_URL="itms-services://?action=download-manifest&url=${ENCODED_MANIFEST_URL}"
 
           {
-            echo "## Ссылки на установку и скачивание"
+            echo "## Ссылки для релиза $RELEASE_TAG"
             echo
-            echo "- [Открыть страницу установки с кнопкой «Установить»]($PAGES_URL)"
-            echo "- [Скачать IPA для установки вручную]($IPA_URL)"
-            echo "- [Установить напрямую на iPhone/iPad]($INSTALL_URL)"
-            echo "- [Открыть manifest]($MANIFEST_URL)"
-            echo "- [Открыть релиз $RELEASE_TAG](https://github.com/${GITHUB_REPOSITORY}/releases/tag/$RELEASE_TAG)"
+            echo "- [Открыть страницу установки последней версии]($PAGES_URL)"
+            echo "- [Скачать IPA $RELEASE_TAG]($IPA_URL)"
+            echo "- [Скачать manifest.plist для $RELEASE_TAG](https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/manifest.plist)"
+            echo "- [Установить $RELEASE_TAG напрямую на iPhone/iPad]($INSTALL_URL)"
+            echo "- [Открыть страницу релиза]($MANIFEST_URL)"
           } >> "$GITHUB_STEP_SUMMARY"
