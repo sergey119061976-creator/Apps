@@ -10,6 +10,7 @@ on:
     paths:
       - .github/workflows/generate-manifest.yml
       - scripts/generate_manifest.py
+      - index.html
   workflow_dispatch:
     inputs:
       release_tag:
@@ -31,7 +32,12 @@ jobs:
       releases: ${{ steps.find.outputs.releases }}
       has_work: ${{ steps.find.outputs.has_work }}
     steps:
-      - name: Find releases with a new IPA
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Find releases with a new IPA or missing release page
         id: find
         env:
           GH_TOKEN: ${{ github.token }}
@@ -63,6 +69,17 @@ jobs:
             ]
           ' "$RUNNER_TEMP/releases-list.json" > "$RUNNER_TEMP/pending-releases.json"
 
+          while IFS= read -r RELEASE_TAG; do
+            if [ ! -f "release-data/$RELEASE_TAG/app-info.json" ]; then
+              jq --arg tag "$RELEASE_TAG" '. += [{"tag": $tag}]' \
+                "$RUNNER_TEMP/pending-releases.json" > "$RUNNER_TEMP/pending-releases.tmp"
+              mv "$RUNNER_TEMP/pending-releases.tmp" "$RUNNER_TEMP/pending-releases.json"
+            fi
+          done < <(jq -r '.[] | select(.draft == false) | select(([.assets[]? | select(.name | ascii_downcase | endswith(".ipa"))] | length) == 1) | .tag_name' "$RUNNER_TEMP/releases-list.json")
+
+          jq -c 'unique_by(.tag)' "$RUNNER_TEMP/pending-releases.json" > "$RUNNER_TEMP/pending-releases.tmp"
+          mv "$RUNNER_TEMP/pending-releases.tmp" "$RUNNER_TEMP/pending-releases.json"
+
           if [ "$(jq 'length' "$RUNNER_TEMP/pending-releases.json")" -gt 0 ]; then
             echo "has_work=true" >> "$GITHUB_OUTPUT"
             jq -c '{include: .}' "$RUNNER_TEMP/pending-releases.json" | sed 's/^/releases=/' >> "$GITHUB_OUTPUT"
@@ -77,6 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix: ${{ fromJson(needs.find-releases.outputs.releases) }}
     env:
       RELEASE_TAG: ${{ matrix.tag }}
@@ -125,39 +143,47 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --clobber
 
-      - name: Publish latest app details to GitHub Pages
+      - name: Publish this release's installation page data
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          mkdir -p "release-data/$RELEASE_TAG"
+          cp dist/app-info.json "release-data/$RELEASE_TAG/app-info.json"
+          cp dist/app-icon.png "release-data/$RELEASE_TAG/app-icon.png"
+
           LATEST_TAG="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
-          if [ "$LATEST_TAG" != "$RELEASE_TAG" ]; then
-            echo "This release is not the latest stable release; page data stays unchanged."
-            exit 0
+          if [ "$LATEST_TAG" = "$RELEASE_TAG" ]; then
+            cp dist/app-info.json app-info.json
+            cp dist/app-icon.png app-icon.png
           fi
-          cp dist/app-info.json app-info.json
-          cp dist/app-icon.png app-icon.png
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app-info.json app-icon.png
+          git add "release-data/$RELEASE_TAG/app-info.json" "release-data/$RELEASE_TAG/app-icon.png"
+          if [ "$LATEST_TAG" = "$RELEASE_TAG" ]; then
+            git add app-info.json app-icon.png
+          fi
           if ! git diff --cached --quiet; then
-            git commit -m "Update app details for $RELEASE_TAG"
+            git commit -m "Publish installation page for $RELEASE_TAG"
             git push origin HEAD:main
           fi
 
-      - name: Add installation and download links to run summary
+      - name: Add this release's unique links to run summary
         run: |
           IPA_URL="$(jq -r '.assets[] | select(.name | ascii_downcase | endswith(".ipa")) | .browser_download_url' "$RUNNER_TEMP/release-event.json")"
-          MANIFEST_URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/$RELEASE_TAG"
           PAGES_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
-          ENCODED_MANIFEST_URL="https%3A%2F%2Fgithub.com%2F${GITHUB_REPOSITORY//\//%2F}%2Freleases%2Fdownload%2F$RELEASE_TAG%2Fmanifest.plist"
+          TAG_QUERY="$(jq -rn --arg tag "$RELEASE_TAG" '$tag | @uri')"
+          RELEASE_PAGE="${PAGES_URL}?release=${TAG_QUERY}"
+          MANIFEST_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/manifest.plist"
+          ENCODED_MANIFEST_URL="$(jq -rn --arg url "$MANIFEST_URL" '$url | @uri')"
           INSTALL_URL="itms-services://?action=download-manifest&url=${ENCODED_MANIFEST_URL}"
 
           {
-            echo "## Ссылки для релиза $RELEASE_TAG"
+            echo "## Отдельные ссылки для релиза $RELEASE_TAG"
             echo
-            echo "- [Открыть страницу установки последней версии]($PAGES_URL)"
-            echo "- [Скачать IPA $RELEASE_TAG]($IPA_URL)"
-            echo "- [Скачать manifest.plist для $RELEASE_TAG](https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/manifest.plist)"
-            echo "- [Установить $RELEASE_TAG напрямую на iPhone/iPad]($INSTALL_URL)"
-            echo "- [Открыть страницу релиза]($MANIFEST_URL)"
+            echo "- [Страница установки только версии $RELEASE_TAG]($RELEASE_PAGE)"
+            echo "- [Скачать IPA только версии $RELEASE_TAG]($IPA_URL)"
+            echo "- [Установить версию $RELEASE_TAG напрямую на iPhone/iPad]($INSTALL_URL)"
+            echo "- [Скачать manifest для версии $RELEASE_TAG]($MANIFEST_URL)"
+            echo "- [Открыть страницу релиза](https://github.com/$GITHUB_REPOSITORY/releases/tag/$RELEASE_TAG)"
           } >> "$GITHUB_STEP_SUMMARY"
