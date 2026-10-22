@@ -1,0 +1,10 @@
+{
+  "title": "Почта Mail.ru",
+  "version": "15.92.0",
+  "minimum_ios": "16.0",
+  "tag": "Mail.ru",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Mail.ru/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Mail.ru/Mail.RU_15.92.0.ipa",
+  "apple_id": "mi…l.ru"
+}

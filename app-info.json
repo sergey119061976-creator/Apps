@@ -1,10 +1,10 @@
 {
-  "title": "VK",
-  "version": "8.183.1",
-  "minimum_ios": "17.6",
-  "tag": "VK",
+  "title": "Почта Mail.ru",
+  "version": "15.92.0",
+  "minimum_ios": "16.0",
+  "tag": "Mail.ru",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/VK/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/VK/_8.183.1.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Mail.ru/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Mail.ru/Mail.RU_15.92.0.ipa",
   "apple_id": "mi…l.ru"
 }
