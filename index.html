@@ -33,6 +33,7 @@
     <img id="icon" src="app-icon.png" alt="Иконка приложения">
     <h1 id="title">Приложение</h1>
     <p id="version"></p>
+    <p id="minimum-ios" hidden></p>
     <p id="apple-id" hidden></p>
     <p class="instructions">Откройте эту страницу в Safari на iPhone или iPad и нажмите «Установить». Подтвердите установку приложения на устройстве.</p>
     <a id="install" href="itms-services://?action=download-manifest&amp;url=https%3A%2F%2Fgithub.com%2Fsergey119061976-creator%2FApps%2Freleases%2Flatest%2Fdownload%2Fmanifest.plist" aria-disabled="true">Установить</a>
@@ -55,6 +56,11 @@
         document.title = app.title || 'Установка приложения';
         document.getElementById('title').textContent = app.title || 'Приложение';
         document.getElementById('version').textContent = app.version ? 'Версия ' + app.version : '';
+        const minimumIosLine = document.getElementById('minimum-ios');
+        if (typeof app.minimum_ios === 'string' && app.minimum_ios.trim()) {
+          minimumIosLine.textContent = 'Минимальная iOS: ' + app.minimum_ios.trim();
+          minimumIosLine.hidden = false;
+        }
         const appleIdLine = document.getElementById('apple-id');
         if (typeof app.apple_id === 'string' && app.apple_id.trim()) {
           appleIdLine.textContent = 'Apple ID: ' + app.apple_id.trim();
