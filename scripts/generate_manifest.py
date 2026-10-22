@@ -3,13 +3,13 @@
 
 import argparse
 import json
+import plistlib
 import shutil
 import struct
 import subprocess
 import tempfile
 import urllib.request
 import zipfile
-import plistlib
 from pathlib import Path
 from PIL import Image
 
@@ -49,6 +49,35 @@ def icon_candidates_from_plist(info: dict, app_prefix: str) -> list[str]:
         files = primary.get("CFBundleIconFiles", []) if isinstance(primary, dict) else []
         names.extend(f"{app_prefix}/{name}" for name in files if isinstance(name, str))
     return names
+
+
+def extract_apple_id(archive: zipfile.ZipFile) -> str | None:
+    """Read the account identifier recorded in an App Store iTunesMetadata.plist."""
+    paths = [
+        name for name in archive.namelist()
+        if Path(name).name.lower() == "itunesmetadata.plist"
+    ]
+    paths.sort(key=lambda name: (name.count("/"), name.lower()))
+    for path in paths:
+        try:
+            metadata = plistlib.loads(archive.read(path))
+        except (plistlib.InvalidFileException, KeyError):
+            continue
+        download_info = metadata.get("com.apple.iTunesStore.downloadInfo", {})
+        account_info = (
+            download_info.get("accountInfo", {})
+            if isinstance(download_info, dict) else {}
+        )
+        candidates = [
+            account_info.get("AppleID"),
+            account_info.get("appleId"),
+            metadata.get("appleId"),
+            metadata.get("AppleID"),
+        ]
+        for value in candidates:
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return None
 
 
 def extract_icon(archive: zipfile.ZipFile, info: dict, app_dir: str, work: Path) -> Path:
@@ -133,6 +162,9 @@ def main() -> None:
         ipa_path = work / "app.ipa"
         download(ipa_assets[0]["browser_download_url"], ipa_path)
         with zipfile.ZipFile(ipa_path) as archive:
+            # The account identifier may be present in App Store download metadata.
+            apple_id = extract_apple_id(archive)
+
             # An IPA can bundle Watch apps and extensions with their own Info.plist.
             # The installable iOS app is the .app directly inside Payload/.
             plist_paths = [
@@ -182,6 +214,7 @@ def main() -> None:
         "icon": "app-icon.png",
         "manifest": manifest_url,
         "download": ipa_url,
+        "apple_id": apple_id,
     }
     (output_dir / "app-info.json").write_text(
         json.dumps(app_info, ensure_ascii=False, indent=2) + "\n",
