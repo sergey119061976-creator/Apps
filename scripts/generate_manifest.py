@@ -88,6 +88,13 @@ def extract_apple_id(archive: zipfile.ZipFile) -> str | None:
     return None
 
 
+def create_fallback_icon(work: Path) -> Path:
+    """Create a plain white app icon when the IPA has no extractable icon."""
+    result = work / "app-icon-fallback.png"
+    Image.new("RGB", (512, 512), "white").save(result, format="PNG")
+    return result
+
+
 def extract_icon(archive: zipfile.ZipFile, info: dict, app_dir: str, work: Path) -> Path:
     """Prefer original icon PNGs; otherwise decode AppIcon from Assets.car."""
     names = icon_candidates_from_plist(info, app_dir)
@@ -200,7 +207,14 @@ def main() -> None:
             minimum_ios = info.get("MinimumOSVersion")
             if not bundle_id or not version or not title:
                 raise RuntimeError("Could not determine app bundle ID, version, and title")
-            icon_source = extract_icon(archive, info, app_dir, work)
+            try:
+                icon_source = extract_icon(archive, info, app_dir, work)
+            except Exception as error:
+                print(
+                    "::warning::Could not extract the app icon; "
+                    f"using a white fallback icon instead: {error}"
+                )
+                icon_source = create_fallback_icon(work)
             shutil.copyfile(icon_source, output_dir / "app-icon.png")
 
         ipa_url = ipa_assets[0]["browser_download_url"]
