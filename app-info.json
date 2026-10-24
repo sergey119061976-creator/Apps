@@ -1,10 +1,10 @@
 {
-  "title": "ChatGPT",
-  "version": "1.2026.286",
-  "minimum_ios": "18.0",
-  "tag": "GPT",
+  "title": "Gemini",
+  "version": "1.2026.4171302",
+  "minimum_ios": "18.2",
+  "tag": "Gemini1",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/GPT/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/GPT/ChatGPT_1.2026.286.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Gemini1/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Gemini1/Google.Gemini_1.2026.4171302.ipa",
   "apple_id": "co….com"
 }
