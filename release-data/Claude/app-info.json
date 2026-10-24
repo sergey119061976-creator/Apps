@@ -1,0 +1,10 @@
+{
+  "title": "Claude",
+  "version": "1.261023.20",
+  "minimum_ios": "18.0",
+  "tag": "Claude",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Claude/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Claude/Claude.by.Anthropic_1.261023.20.ipa",
+  "apple_id": "co….com"
+}
