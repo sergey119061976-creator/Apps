@@ -1,10 +1,10 @@
 {
-  "title": "Claude",
-  "version": "1.261023.20",
+  "title": "ChatGPT",
+  "version": "1.2026.286",
   "minimum_ios": "18.0",
-  "tag": "Claude",
+  "tag": "GPT",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Claude/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Claude/Claude.by.Anthropic_1.261023.20.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/GPT/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/GPT/ChatGPT_1.2026.286.ipa",
   "apple_id": "co….com"
 }
