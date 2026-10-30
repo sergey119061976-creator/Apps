@@ -1,0 +1,10 @@
+{
+  "title": "Yandex.Music",
+  "version": "818",
+  "minimum_ios": "17.0",
+  "tag": "Yandex_Music",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Yandex_Music/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Yandex_Music/Yandex.Music.Books.Podcasts_818.ipa",
+  "apple_id": "mi…l.ru"
+}
