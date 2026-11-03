@@ -1,10 +1,10 @@
 {
-  "title": "Yandex.Music",
-  "version": "818",
-  "minimum_ios": "17.0",
-  "tag": "Yandex_Music",
+  "title": "Advance",
+  "version": "1.2",
+  "minimum_ios": "16.0",
+  "tag": "Alfabank",
   "icon": "app-icon.png",
-  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Yandex_Music/manifest.plist",
-  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Yandex_Music/Yandex.Music.Books.Podcasts_818.ipa",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Alfabank/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Alfabank/_1.2.ipa",
   "apple_id": "mi…l.ru"
 }
