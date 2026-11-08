@@ -1,0 +1,10 @@
+{
+  "title": "VPN Secure",
+  "version": "1.0.3",
+  "minimum_ios": "17.6",
+  "tag": "Happ",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Happ/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Happ/Happ.VPN_1.0.3.ipa",
+  "apple_id": "mi…l.ru"
+}
