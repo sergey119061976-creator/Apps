@@ -1,0 +1,10 @@
+{
+  "title": "MAX",
+  "version": "25.17.0",
+  "minimum_ios": "15.5",
+  "tag": "Max7",
+  "icon": "app-icon.png",
+  "manifest": "https://github.com/sergey119061976-creator/Apps/releases/download/Max7/manifest.plist",
+  "download": "https://github.com/sergey119061976-creator/Apps/releases/download/Max7/Max_25.17.0.ipa",
+  "apple_id": "mi…l.ru"
+}
